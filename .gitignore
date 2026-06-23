@@ -1,0 +1,7 @@
+node_modules/
+/browserstack.yml
+.env
+test-results/
+playwright-report/
+log/
+*.log

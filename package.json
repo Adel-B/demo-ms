@@ -1,0 +1,20 @@
+{
+  "name": "browserstack-two-site-demo",
+  "version": "1.0.0",
+  "description": "BrowserStack Playwright Demo — Cross-browser Ecommerce + M&S Flowers",
+  "scripts": {
+    "pretest:ecommerce": "kill $(lsof -ti:5338) 2>/dev/null; rm -f ~/.percy/agent-5338.lock || true; cp browserstack.ecommerce.yml browserstack.yml",
+    "test:ecommerce": "browserstack-node-sdk playwright test --config playwright.ecommerce.config.ts",
+    "pretest:ms-flowers": "kill $(lsof -ti:5338) 2>/dev/null; rm -f ~/.percy/agent-5338.lock || true; cp browserstack.ms-flowers.yml browserstack.yml",
+    "test:ms-flowers": "browserstack-node-sdk playwright test --config playwright.ms-flowers.config.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.44.1",
+    "browserstack-node-sdk": "^1.57.1",
+    "playwright": "^1.44.1",
+    "typescript": "^6.0.3"
+  }
+}
