@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import percySnapshot from '@percy/playwright';
 import { acceptCookieConsent } from '../../helpers/cookie-consent';
 
 const FLOWERS_URL = 'https://www.marksandspencer.com/l/gifts/flowers';
@@ -19,6 +20,8 @@ test.describe('M&S Flowers Landing Page', () => {
       // Verify at least one product link is visible
       await expect(page.locator('main').getByRole('link').first()).toBeVisible({ timeout: 30000 });
     });
+
+    await percySnapshot(page, 'M&S Flowers Landing Page');
   });
 
   test('should display filter and sort controls', async ({ page }) => {
@@ -38,6 +41,8 @@ test.describe('M&S Flowers Landing Page', () => {
         await expect(page.locator('main')).toBeVisible({ timeout: 15000 });
       }
     });
+
+    await percySnapshot(page, 'M&S Flowers Filters and Sort');
   });
 
   test('should navigate to a product detail page', async ({ page }) => {
@@ -51,5 +56,7 @@ test.describe('M&S Flowers Landing Page', () => {
     await test.step('Verify product detail page loaded', async () => {
       await expect(page.locator('main h1')).toBeVisible({ timeout: 30000 });
     });
+
+    await percySnapshot(page, 'M&S Flower Product Detail Page');
   });
 });

@@ -6,12 +6,16 @@
     "pretest:ecommerce": "kill $(lsof -ti:5338) 2>/dev/null; rm -f ~/.percy/agent-5338.lock || true; cp browserstack.ecommerce.yml browserstack.yml",
     "test:ecommerce": "browserstack-node-sdk playwright test --config playwright.ecommerce.config.ts",
     "pretest:ms-flowers": "kill $(lsof -ti:5338) 2>/dev/null; rm -f ~/.percy/agent-5338.lock || true; cp browserstack.ms-flowers.yml browserstack.yml",
-    "test:ms-flowers": "browserstack-node-sdk playwright test --config playwright.ms-flowers.config.ts"
+    "test:ms-flowers": "browserstack-node-sdk playwright test --config playwright.ms-flowers.config.ts",
+    "test:percy:ecommerce": "npx percy exec -- npx playwright test --config=playwright.percy.config.ts",
+    "test:percy:ms-flowers": "npx percy exec -- npx playwright test --config=playwright.percy.ms-flowers.config.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@percy/cli": "^1.32.2",
+    "@percy/playwright": "^1.1.0",
     "@playwright/test": "^1.44.1",
     "browserstack-node-sdk": "^1.57.1",
     "playwright": "^1.44.1",

@@ -104,6 +104,55 @@ The workflow uses these secrets as environment variables — no credentials are 
 
 ---
 
+## 🔍 Visual Regression Testing (Percy)
+
+Percy runs as a **separate step after functional tests pass**, acting as a PR gate — visual diffs block merging even if all functional tests passed.
+
+### How it works
+
+Each test file imports `percySnapshot` from `@percy/playwright` and captures a snapshot after key assertions. Percy compares snapshots against the approved baseline and flags any visual differences for review.
+
+### Run Percy locally
+
+```bash
+export PERCY_TOKEN="your_percy_token"
+npm run test:percy:ecommerce
+npm run test:percy:ms-flowers
+```
+
+### Add PERCY_TOKEN as a GitHub secret
+
+In your GitHub repo, go to **Settings → Secrets and variables → Actions** and add:
+
+| Secret name | Value |
+|-------------|-------|
+| `PERCY_TOKEN` | Your Percy project token (found in Percy dashboard → Project Settings) |
+
+### Percy scripts
+
+| Script | Description |
+|--------|-------------|
+| `npm run test:percy:ecommerce` | Runs ecommerce suite with Percy snapshot capture |
+| `npm run test:percy:ms-flowers` | Runs M&S Flowers suite with Percy snapshot capture |
+
+> These scripts run Playwright directly (not via BrowserStack SDK) so Percy can capture DOM snapshots locally or in CI. The functional `test:ecommerce` and `test:ms-flowers` scripts are unchanged.
+
+### Snapshots captured
+
+**Ecommerce:**
+- `Ecommerce Homepage`
+- `Ecommerce Men Category`
+- `Ecommerce Women Category`
+- `Ecommerce Men Product Listing`
+- `Ecommerce Women Product Listing`
+
+**M&S Flowers:**
+- `M&S Flowers Landing Page`
+- `M&S Flowers Filters and Sort`
+- `M&S Flower Product Detail Page`
+
+---
+
 ## 🗂 Project Structure
 
 ```
@@ -172,7 +221,7 @@ Tests run via `browserstack-node-sdk` which:
 
 ### Percy Visual Snapshots
 
-Percy is enabled in both YML configs (`percy: true`). Visual snapshots are captured automatically during test runs and compared against baselines in the Percy dashboard.
+Percy is enabled in both BrowserStack YML configs (`percy: true`) for BrowserStack-integrated runs. For standalone Percy visual regression, use `npm run test:percy:ecommerce` and `npm run test:percy:ms-flowers` — see the [🔍 Visual Regression Testing](#-visual-regression-testing-percy) section above.
 
 ### Accessibility Automation
 

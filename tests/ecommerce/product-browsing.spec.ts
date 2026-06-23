@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import percySnapshot from '@percy/playwright';
 import { EcommerceHomePage } from '../../pages/ecommerce/EcommerceHomePage';
 
 test.describe('Product Browsing', () => {
@@ -17,6 +18,8 @@ test.describe('Product Browsing', () => {
       const count = await images.count();
       expect(count).toBeGreaterThan(1);
     });
+
+    await percySnapshot(page, 'Ecommerce Men Product Listing');
   });
 
   test('should display Women category products', async ({ page }) => {
@@ -35,6 +38,8 @@ test.describe('Product Browsing', () => {
     await test.step('Verify products are visible', async () => {
       await expect(page.getByRole('img').first()).toBeVisible({ timeout: 30000 });
     });
+
+    await percySnapshot(page, 'Ecommerce Women Product Listing');
   });
 
   // INTENTIONAL FAILURE — for RCA AI Agent demo

@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import percySnapshot from '@percy/playwright';
 import { EcommerceHomePage } from '../../pages/ecommerce/EcommerceHomePage';
 
 test.describe('Homepage & Navigation', () => {
@@ -16,6 +17,8 @@ test.describe('Homepage & Navigation', () => {
     await test.step('Verify navigation is visible', async () => {
       await expect(home.nav).toBeVisible({ timeout: 30000 });
     });
+
+    await percySnapshot(page, 'Ecommerce Homepage');
   });
 
   test('should navigate to Men category', async ({ page }) => {
@@ -33,6 +36,8 @@ test.describe('Homepage & Navigation', () => {
     await test.step('Verify Men category page loaded', async () => {
       await expect(page.locator('main h1').filter({ hasText: "Men's Fashion" })).toBeVisible({ timeout: 30000 });
     });
+
+    await percySnapshot(page, 'Ecommerce Men Category');
   });
 
   test('should navigate to Women category', async ({ page }) => {
@@ -50,5 +55,7 @@ test.describe('Homepage & Navigation', () => {
     await test.step('Verify Women category page loaded', async () => {
       await expect(page.locator('main h1').filter({ hasText: "Women's Fashion" })).toBeVisible({ timeout: 30000 });
     });
+
+    await percySnapshot(page, 'Ecommerce Women Category');
   });
 });
