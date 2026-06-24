@@ -16,15 +16,11 @@ test.describe('Checkout Flow', () => {
       await home.clickNavCategory('Men');
     });
 
-    await test.step('Click Polo Shirt product image', async () => {
+    await test.step('Click Polo Shirt product image and verify PDP loaded', async () => {
       // Observed: img[alt="Polo Shirt"] on the Men category listing page
       await page.getByRole('img', { name: 'Polo Shirt' }).first().click();
-      await page.waitForLoadState('load');
-    });
-
-    await test.step('Verify product detail page loaded', async () => {
-      // Observed: h1 "Polo Shirt" on PDP
-      await expect(page.locator('main h1').filter({ hasText: 'Polo Shirt' })).toBeVisible({ timeout: 30000 });
+      // Wait for PDP h1 explicitly — the assertion IS the wait, no redundant toBeVisible needed
+      await expect(page.locator('main h1').filter({ hasText: 'Polo Shirt' })).toBeVisible();
     });
 
     await percySnapshot(page, 'Ecommerce Product Detail Page');
@@ -42,7 +38,7 @@ test.describe('Checkout Flow', () => {
     await test.step('Navigate to cart', async () => {
       // Observed: button "View Cart" on PDP after add to cart
       await page.getByRole('button', { name: 'View Cart' }).click();
-      await page.waitForLoadState('load');
+      // No waitForLoadState — the cart heading assertion below IS the wait
     });
 
     await test.step('Verify cart page loaded with item', async () => {
@@ -56,7 +52,7 @@ test.describe('Checkout Flow', () => {
     await test.step('Proceed to checkout', async () => {
       // Observed: button "Proceed to Checkout" in Order Summary section
       await page.getByRole('button', { name: 'Proceed to Checkout' }).click();
-      await page.waitForLoadState('load');
+      // No waitForLoadState — the checkout heading assertion below IS the wait
     });
 
     await test.step('Verify checkout page loaded', async () => {

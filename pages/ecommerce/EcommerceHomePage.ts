@@ -20,28 +20,21 @@ export class EcommerceHomePage {
   }
 
   async goto() {
-    await this.page.goto('https://ecommercebs.vercel.app/', { waitUntil: 'domcontentloaded', timeout: 60000 });
-    await this.page.waitForLoadState('load', { timeout: 60000 });
+    // domcontentloaded is sufficient — individual actions use locator auto-waiting
+    await this.page.goto('https://ecommercebs.vercel.app/', { waitUntil: 'domcontentloaded' });
   }
 
   async clickNavCategory(name: string) {
-    // Try direct button click first (desktop nav)
-    const directBtn = this.page.getByRole('button', { name, exact: true }).first();
-    const isVisible = await directBtn.isVisible({ timeout: 5000 }).catch(() => false);
+    const btn = this.page.getByRole('button', { name, exact: true }).first();
 
-    if (!isVisible) {
-      // Mobile: open hamburger menu first, then click category
-      const hamburger = this.page.getByRole('button', { name: /menu|hamburger|open/i }).first();
-      const hamburgerAlt = this.page.locator('button[aria-label*="menu" i], button[aria-label*="nav" i]').first();
-      const menuBtn = await hamburger.isVisible({ timeout: 3000 }).catch(() => false)
-        ? hamburger
-        : hamburgerAlt;
-      await menuBtn.click({ timeout: 10000 }).catch(() => {});
-      await this.page.waitForTimeout(500);
-    }
+    // Explicit locator wait — Playwright recommended pattern (playwright.dev/docs/actionability)
+    // Waits for the button to be attached, visible, and stable before clicking
+    await btn.waitFor({ state: 'visible' });
+    await btn.click();
 
-    await this.page.getByRole('button', { name, exact: true }).first().click({ timeout: 30000 });
-    await this.page.waitForLoadState('load');
+    // Wait for the category h1 to appear — this IS the signal that navigation completed
+    // Avoids waitForLoadState('networkidle') which is discouraged by Playwright
+    await this.page.locator('main h1').waitFor({ state: 'visible' });
   }
 
   async search(term: string) {
@@ -50,15 +43,18 @@ export class EcommerceHomePage {
     if (inputExists > 0) {
       await this.searchInput.fill(term, { force: true });
       await this.page.keyboard.press('Enter');
-      await this.page.waitForLoadState('load');
+      // Wait for search results h1 to confirm navigation completed
+      await this.page.locator('main h1').waitFor({ state: 'visible' });
     } else {
       // Navigate directly to search URL as fallback
-      await this.page.goto(`https://ecommercebs.vercel.app/?search=${encodeURIComponent(term)}`);
-      await this.page.waitForLoadState('load');
+      await this.page.goto(`https://ecommercebs.vercel.app/?search=${encodeURIComponent(term)}`, {
+        waitUntil: 'domcontentloaded',
+      });
+      await this.page.locator('main h1').waitFor({ state: 'visible' });
     }
   }
 
   async verifyLoaded() {
-    await expect(this.logo).toBeVisible({ timeout: 30000 });
+    await expect(this.logo).toBeVisible();
   }
 }
