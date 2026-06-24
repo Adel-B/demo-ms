@@ -1,0 +1,24 @@
+userName: ${{ env.BROWSERSTACK_USERNAME }}
+accessKey: ${{ env.BROWSERSTACK_ACCESS_KEY }}
+projectName: Cross-Browser Ecommerce Demo
+buildName: Ecommerce Accessibility Scan
+buildIdentifier: '#${BUILD_NUMBER}'
+
+platforms:
+  - os: Windows
+    osVersion: 11
+    browserName: chrome
+    browserVersion: latest
+    playwrightConfigOptions:
+      name: windows-chrome
+
+parallelsPerPlatform: 3
+debug: true
+networkLogs: true
+consoleLogs: errors
+
+# Accessibility scanning enabled — results appear in BrowserStack TRA
+accessibility: true
+percy: false
+
+framework: playwright

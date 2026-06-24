@@ -1,24 +1,23 @@
-name: BrowserStack Tests
+name: Quality Gates — BrowserStack Demo
 
 on:
   push:
-    branches: [main]
+    branches: [main, 'feature/**']
   pull_request:
     branches: [main]
 
 jobs:
-  ecommerce-tests:
-    name: Ecommerce Cross-Browser Suite
+  # ── Gate 1: Functional Tests (BrowserStack Automate — cross-browser) ──────────
+  functional:
+    name: "Gate 1 · Functional Tests (BrowserStack)"
     runs-on: ubuntu-latest
     env:
       BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
       BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Node.js 18
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
@@ -26,45 +25,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run ecommerce tests on BrowserStack
+      - name: Run ecommerce tests — Windows Chrome + OSX Safari + Samsung S23 Ultra
         run: npm run test:ecommerce
 
-  ms-flowers-tests:
-    name: M&S Flowers QA Suite
+  # ── Gate 2: Visual Regression (Percy Web) ────────────────────────────────────
+  visual:
+    name: "Gate 2 · Visual Regression (Percy)"
     runs-on: ubuntu-latest
+    needs: functional
     env:
-      BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
-      BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js 18
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run M&S Flowers tests on BrowserStack
-        run: npm run test:ms-flowers
-
-  percy-visual-tests:
-    name: Percy Visual Regression
-    runs-on: ubuntu-latest
-    needs: [ecommerce-tests, ms-flowers-tests]
-    env:
-      BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
-      BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
       PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Node.js 18
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
@@ -72,8 +46,42 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run Percy visual tests — Ecommerce
+      - name: Percy snapshot — desktop (1280px)
         run: npm run test:percy:ecommerce
 
-      - name: Run Percy visual tests — M&S Flowers
-        run: npm run test:percy:ms-flowers
+      - name: Percy snapshot — mobile (375px, triggers visual diff)
+        run: npx percy exec -- npx playwright test --config=playwright.percy.mobile.config.ts
+
+  # ── Gate 3: Accessibility (BrowserStack Automate with accessibility:true) ─────
+  accessibility:
+    name: "Gate 3 · Accessibility (BrowserStack)"
+    runs-on: ubuntu-latest
+    needs: functional
+    env:
+      BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
+      BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Copy accessibility BrowserStack config
+        run: cp browserstack.accessibility.yml browserstack.yml
+
+      - name: Run ecommerce tests with accessibility scanning enabled
+        run: browserstack-node-sdk playwright test --config playwright.ecommerce.config.ts
+
+  # ── Gate 4: Quality Gate (blocks merge if any gate failed) ───────────────────
+  quality-gate:
+    name: "Gate 4 · Quality Gate (all checks must pass)"
+    runs-on: ubuntu-latest
+    needs: [functional, visual, accessibility]
+    steps:
+      - name: All quality gates passed
+        run: echo "✅ Functional + Visual + Accessibility all passed — PR is safe to merge."
