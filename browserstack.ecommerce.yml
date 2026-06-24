@@ -19,6 +19,7 @@ platforms:
     osVersion: 13.0
     playwrightConfigOptions:
       name: samsung-mobile
+testTimeout: 90000
 parallelsPerPlatform: 1
 debug: true
 networkLogs: true
